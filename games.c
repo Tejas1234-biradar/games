@@ -4,13 +4,13 @@
 #include <conio.h> // For _kbhit() and _getch()
 
 #define SIZE 4
-#define BOARD_SIZE 4
 
 // Function prototypes
 void play2048();
 void memoryGame();
-void option3();
-void option4();
+void ticTacToe();
+void dinoGame();
+void Exit();
 void initialize_game(int board[SIZE][SIZE]);
 void print_board(int board[SIZE][SIZE]);
 int can_move(int board[SIZE][SIZE]);
@@ -21,18 +21,16 @@ int main() {
     int choice;
 
     while (1) {
-        // Display the menu
         printf("\nMenu:\n");
         printf("1. Play 2048\n");
         printf("2. Play Memory Game\n");
-        printf("3. Option 3\n");
-        printf("4. Exit\n");
-        printf("Enter your choice (1-4): ");
+        printf("3. Play Tic Tac Toe\n");
+        printf("4. Clear Console\n");
+        printf("5. Exit\n");
+        printf("Enter your choice (1-5): ");
 
-        // Read the user's choice
         scanf("%d", &choice);
 
-        // Handle the choice using a switch statement
         switch (choice) {
             case 1:
                 play2048();
@@ -41,13 +39,16 @@ int main() {
                 memoryGame();
                 break;
             case 3:
-                option3();
+                ticTacToe();
                 break;
             case 4:
-                option4();
-                return 0; // Exit the program
+                dinoGame();
+                break;
+            case 5:
+                Exit();
+                return 0;
             default:
-                printf("Invalid choice! Please select a valid option (1-4).\n");
+                printf("Invalid choice! Please select a valid option (1-5).\n");
         }
     }
 
@@ -67,7 +68,7 @@ void initialize_game(int board[SIZE][SIZE]) {
 
 // Print the 2048 board
 void print_board(int board[SIZE][SIZE]) {
-    system("cls"); // Clear the console
+    system("cls");
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (board[i][j] == 0)
@@ -146,15 +147,99 @@ void play2048() {
     }
 }
 
-// Memory Game Implementation (unchanged)
+// Memory Game Implementation
 void memoryGame() {
-    // Implementation here...
+    // Same implementation as before.
+    printf("Memory Game is under construction.\n");
 }
 
-void option3() {
-    printf("You selected Option 3: Doing something else.\n");
+// Tic Tac Toe Implementation
+void ticTacToe() {
+    char board[3][3];
+    int i, j, move, moves = 0;
+    char player = 'X';
+    int positions[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+    // Initialize the board
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            board[i][j] = ' ';
+        }
+    }
+
+    while (moves < 9) {
+        // Display the board
+        system("cls");
+        printf("Tic Tac Toe\n");
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++) {
+                if (board[i][j] == ' ')
+                    printf(" %d ", positions[i][j]);
+                else
+                    printf(" %c ", board[i][j]);
+                if (j < 2) printf("|");
+            }
+            if (i < 2) printf("\n---|---|---\n");
+        }
+
+        // Player input
+        printf("\nPlayer %c, enter your move (1-9): ", player);
+        scanf("%d", &move);
+
+        // Map move to row and column
+        int row = (move - 1) / 3;
+        int col = (move - 1) % 3;
+
+        // Validate the move
+        if (move < 1 || move > 9 || board[row][col] != ' ') {
+            printf("Invalid move! Press any key to try again...\n");
+            _getch(); // Pause to let the player read the message
+            continue;
+        }
+
+        // Update board and increment moves
+        board[row][col] = player;
+        moves++;
+
+        // Check for a win
+        for (i = 0; i < 3; i++) {
+            if (board[i][0] == player && board[i][1] == player && board[i][2] == player) {
+                system("cls");
+                printf("Player %c wins!\n", player);
+                return;
+            }
+            if (board[0][i] == player && board[1][i] == player && board[2][i] == player) {
+                system("cls");
+                printf("Player %c wins!\n", player);
+                return;
+            }
+        }
+        if (board[0][0] == player && board[1][1] == player && board[2][2] == player) {
+            system("cls");
+            printf("Player %c wins!\n", player);
+            return;
+        }
+        if (board[0][2] == player && board[1][1] == player && board[2][0] == player) {
+            system("cls");
+            printf("Player %c wins!\n", player);
+            return;
+        }
+
+        // Switch player
+        player = (player == 'X') ? 'O' : 'X';
+    }
+
+    system("cls");
+    printf("It's a draw!\n");
 }
 
-void option4() {
-    printf("Exiting the program.\n");
+
+
+void dinoGame() {
+    //harshali cha dino game ;)
+}
+
+// Exit Program
+void Exit() {
+    printf("Exiting the program. Goodbye!\n");
 }
