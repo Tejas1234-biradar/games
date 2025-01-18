@@ -2,20 +2,27 @@
 #include <stdlib.h>
 #include <time.h>
 #include <conio.h> // For _kbhit() and _getch()
+#include <windows.h> // For Sleep()
 
 #define SIZE 4
+#define TARGET 2048
 
 // Function prototypes
 void play2048();
 void memoryGame();
 void ticTacToe();
-void dinoGame();
+void dinoGame(); // Placeholder
 void Exit();
 void initialize_game(int board[SIZE][SIZE]);
 void print_board(int board[SIZE][SIZE]);
 int can_move(int board[SIZE][SIZE]);
 void add_random_tile(int board[SIZE][SIZE]);
-void handle_input(int board[SIZE][SIZE]);
+int handle_input(int board[SIZE][SIZE]);
+void move_left(int board[SIZE][SIZE], int *moved);
+void move_right(int board[SIZE][SIZE], int *moved);
+void move_up(int board[SIZE][SIZE], int *moved);
+void move_down(int board[SIZE][SIZE], int *moved);
+int check_win(int board[SIZE][SIZE]);
 
 int main() {
     int choice;
@@ -42,7 +49,7 @@ int main() {
                 ticTacToe();
                 break;
             case 4:
-                dinoGame();
+                system("cls");
                 break;
             case 5:
                 Exit();
@@ -69,6 +76,7 @@ void initialize_game(int board[SIZE][SIZE]) {
 // Print the 2048 board
 void print_board(int board[SIZE][SIZE]) {
     system("cls");
+    printf("2048 Game\n");
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (board[i][j] == 0)
@@ -118,39 +126,180 @@ void add_random_tile(int board[SIZE][SIZE]) {
     }
 }
 
+// Check if the player has reached 2048
+int check_win(int board[SIZE][SIZE]) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == TARGET)
+                return 1;
+        }
+    }
+    return 0;
+}
+
 // Handle user input for 2048
-void handle_input(int board[SIZE][SIZE]) {
+int handle_input(int board[SIZE][SIZE]) {
+    int moved = 0;
     char input = _getch();
     switch (input) {
-        case 'w': /* move_up(board); */ break;
-        case 's': /* move_down(board); */ break;
-        case 'a': /* move_left(board); */ break;
-        case 'd': /* move_right(board); */ break;
+        case 'w': move_up(board, &moved); break;
+        case 's': move_down(board, &moved); break;
+        case 'a': move_left(board, &moved); break;
+        case 'd': move_right(board, &moved); break;
         default: break;
+    }
+    return moved;
+}
+
+// Move functions
+void move_left(int board[SIZE][SIZE], int *moved) {
+    for (int i = 0; i < SIZE; i++) {
+        int pos = 0; 
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] != 0) {
+                if (pos > 0 && board[i][pos - 1] == board[i][j]) {
+                    board[i][pos - 1] *= 2;
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else if (pos != j) {
+                    board[i][pos++] = board[i][j];
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else {
+                    pos++;
+                }
+            }
+        }
     }
 }
 
-// 2048 Game Implementation
+void move_right(int board[SIZE][SIZE], int *moved) {
+    for (int i = 0; i < SIZE; i++) {
+        int pos = SIZE - 1;
+        for (int j = SIZE - 1; j >= 0; j--) {
+            if (board[i][j] != 0) {
+                if (pos < SIZE - 1 && board[i][pos + 1] == board[i][j]) {
+                    board[i][pos + 1] *= 2;
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else if (pos != j) {
+                    board[i][pos--] = board[i][j];
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else {
+                    pos--;
+                }
+            }
+        }
+    }
+}
+
+void move_up(int board[SIZE][SIZE], int *moved) {
+    for (int j = 0; j < SIZE; j++) {
+        int pos = 0;
+        for (int i = 0; i < SIZE; i++) {
+            if (board[i][j] != 0) {
+                if (pos > 0 && board[pos - 1][j] == board[i][j]) {
+                    board[pos - 1][j] *= 2;
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else if (pos != i) {
+                    board[pos++][j] = board[i][j];
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else {
+                    pos++;
+                }
+            }
+        }
+    }
+}
+
+void move_down(int board[SIZE][SIZE], int *moved) {
+    for (int j = 0; j < SIZE; j++) {
+        int pos = SIZE - 1;
+        for (int i = SIZE - 1; i >= 0; i--) {
+            if (board[i][j] != 0) {
+                if (pos < SIZE - 1 && board[pos + 1][j] == board[i][j]) {
+                    board[pos + 1][j] *= 2;
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else if (pos != i) {
+                    board[pos--][j] = board[i][j];
+                    board[i][j] = 0;
+                    *moved = 1;
+                } else {
+                    pos--;
+                }
+            }
+        }
+    }
+}
+
+// Play 2048
 void play2048() {
     int board[SIZE][SIZE];
+    int moved;
     srand(time(0));
     initialize_game(board);
 
     while (1) {
         print_board(board);
+        if (check_win(board)) {
+            printf("Congratulations! You've reached 2048! Keep playing? (y/n): ");
+            char choice = _getch();
+            if (choice == 'n' || choice == 'N') return;
+        }
+
         if (!can_move(board)) {
-            printf("Game Over!\n");
+            printf("Game Over! No more moves.\n");
             break;
         }
-        handle_input(board);
-        add_random_tile(board);
+
+        moved = handle_input(board);
+        if (moved) add_random_tile(board);
     }
 }
 
 // Memory Game Implementation
 void memoryGame() {
-    // Same implementation as before.
-    printf("Memory Game is under construction.\n");
+    int sequence[10], input[10], level = 1;
+    srand(time(0));
+
+    while (1) {
+        // Generate and display sequence
+        printf("Level %d: Memorize the sequence:\n", level);
+        for (int i = 0; i < level; i++) {
+            sequence[i] = rand() % 10; // Numbers between 0-9
+            printf("%d ", sequence[i]);
+        }
+        printf("\n");
+        Sleep(3000); // Wait for 3 seconds
+        system("cls");
+
+        // Player's input
+        printf("Enter the sequence:\n");
+        for (int i = 0; i < level; i++) {
+            scanf("%d", &input[i]);
+        }
+
+        // Check input
+        int correct = 1;
+        for (int i = 0; i < level; i++) {
+            if (input[i] != sequence[i]) {
+                correct = 0;
+                break;
+            }
+        }
+
+        if (correct) {
+            printf("Correct! Moving to the next level.\n");
+            level++;
+        } else {
+            printf("Incorrect! Game Over. You reached level %d.\n", level);
+            break;
+        }
+    }
 }
 
 // Tic Tac Toe Implementation
@@ -233,13 +382,12 @@ void ticTacToe() {
     printf("It's a draw!\n");
 }
 
-
-
+// Dino Game Placeholder
 void dinoGame() {
-    //harshali cha dino game ;)
+    printf("Dino Game is currently under development!\n");
 }
 
-// Exit Program
+// Exit Function
 void Exit() {
-    printf("Exiting the program. Goodbye!\n");
+    printf("Thank you for playing!\n");
 }
